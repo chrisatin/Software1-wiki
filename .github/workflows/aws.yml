@@ -1,94 +1,147 @@
-# This workflow will build and push a new container image to Amazon ECR,
-# and then will deploy a new task definition to Amazon ECS, when there is a push to the "main" branch.
+# This workflow will build and deploy your web application to an Amazon EC2 instance
+# when there is a push to the "main" branch.
 #
 # To use this workflow, you will need to complete the following set-up steps:
 #
-# 1. Create an ECR repository to store your images.
-#    For example: `aws ecr create-repository --repository-name my-ecr-repo --region us-east-2`.
-#    Replace the value of the `ECR_REPOSITORY` environment variable in the workflow below with your repository's name.
-#    Replace the value of the `AWS_REGION` environment variable in the workflow below with your repository's region.
+# 1. Create an EC2 instance with Docker installed.
+#    - Use Amazon Linux 2 or Ubuntu
+#    - Install Docker and Docker Compose
+#    - Configure security groups to allow SSH (port 22) and HTTP (port 80)
 #
-# 2. Create an ECS task definition, an ECS cluster, and an ECS service.
-#    For example, follow the Getting Started guide on the ECS console:
-#      https://us-east-2.console.aws.amazon.com/ecs/home?region=us-east-2#/firstRun
-#    Replace the value of the `ECS_SERVICE` environment variable in the workflow below with the name you set for the Amazon ECS service.
-#    Replace the value of the `ECS_CLUSTER` environment variable in the workflow below with the name you set for the cluster.
+# 2. Create an IAM user with EC2 permissions and store the access key in GitHub secrets:
+#    - AWS_ACCESS_KEY_ID
+#    - AWS_SECRET_ACCESS_KEY
+#    - EC2_HOST (your EC2 instance public IP or domain)
+#    - EC2_USER (ec2-user for Amazon Linux, ubuntu for Ubuntu)
+#    - EC2_SSH_KEY (your private SSH key content)
 #
-# 3. Store your ECS task definition as a JSON file in your repository.
-#    The format should follow the output of `aws ecs register-task-definition --generate-cli-skeleton`.
-#    Replace the value of the `ECS_TASK_DEFINITION` environment variable in the workflow below with the path to the JSON file.
-#    Replace the value of the `CONTAINER_NAME` environment variable in the workflow below with the name of the container
-#    in the `containerDefinitions` section of the task definition.
-#
-# 4. Store an IAM user access key in GitHub Actions secrets named `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY`.
-#    See the documentation for each action used below for the recommended IAM policies for this IAM user,
-#    and best practices on handling the access key credentials.
+# 3. Configure your EC2 instance:
+#    - Install Docker: curl -fsSL https://get.docker.com -o get-docker.sh && sh get-docker.sh
+#    - Install Docker Compose: sudo curl -L "https://github.com/docker/compose/releases/download/v2.20.0/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose && sudo chmod +x /usr/local/bin/docker-compose
+#    - Add your user to docker group: sudo usermod -aG docker $USER
 
-name: Deploy to Amazon ECS
+name: Deploy to Amazon EC2
 
 on:
   push:
     branches: [ "main" ]
 
 env:
-  AWS_REGION: MY_AWS_REGION                   # set this to your preferred AWS region, e.g. us-west-1
-  ECR_REPOSITORY: MY_ECR_REPOSITORY           # set this to your Amazon ECR repository name
-  ECS_SERVICE: MY_ECS_SERVICE                 # set this to your Amazon ECS service name
-  ECS_CLUSTER: MY_ECS_CLUSTER                 # set this to your Amazon ECS cluster name
-  ECS_TASK_DEFINITION: MY_ECS_TASK_DEFINITION # set this to the path to your Amazon ECS task definition
-                                               # file, e.g. .aws/task-definition.json
-  CONTAINER_NAME: MY_CONTAINER_NAME           # set this to the name of the container in the
-                                               # containerDefinitions section of your task definition
+  AWS_REGION: us-east-1                       # set this to your preferred AWS region
+  APP_NAME: software1-wiki                    # your application name
+  CONTAINER_NAME: software1-wiki              # Docker container name
+  DOCKER_IMAGE: software1-wiki:latest         # Docker image name and tag
 
 permissions:
   contents: read
 
 jobs:
   deploy:
-    name: Deploy
+    name: Deploy to EC2
     runs-on: ubuntu-latest
     environment: production
 
     steps:
-    - name: Checkout
+    - name: Checkout code
       uses: actions/checkout@v4
 
-    - name: Configure AWS credentials
-      uses: aws-actions/configure-aws-credentials@v1
+    - name: Setup SSH
+      uses: webfactory/ssh-agent@v0.7.0
       with:
-        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        aws-region: ${{ env.AWS_REGION }}
+        ssh-private-key: ${{ secrets.EC2_SSH_KEY }}
 
-    - name: Login to Amazon ECR
-      id: login-ecr
-      uses: aws-actions/amazon-ecr-login@v1
-
-    - name: Build, tag, and push image to Amazon ECR
-      id: build-image
-      env:
-        ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-        IMAGE_TAG: ${{ github.sha }}
+    - name: Add EC2 to known hosts
       run: |
-        # Build a docker container and
-        # push it to ECR so that it can
-        # be deployed to ECS.
-        docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
-        docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
-        echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> $GITHUB_OUTPUT
+        ssh-keyscan -H ${{ secrets.EC2_HOST }} >> ~/.ssh/known_hosts
 
-    - name: Fill in the new image ID in the Amazon ECS task definition
-      id: task-def
-      uses: aws-actions/amazon-ecs-render-task-definition@v1
-      with:
-        task-definition: ${{ env.ECS_TASK_DEFINITION }}
-        container-name: ${{ env.CONTAINER_NAME }}
-        image: ${{ steps.build-image.outputs.image }}
+    - name: Deploy to EC2
+      run: |
+        # Create deployment script
+        cat > deploy_remote.sh << 'EOF'
+        #!/bin/bash
+        set -e
+        
+        echo "🚀 Starting deployment on EC2..."
+        
+        # Navigate to application directory
+        cd /home/${{ secrets.EC2_USER }}/software1-wiki || {
+          echo "Creating application directory..."
+          mkdir -p /home/${{ secrets.EC2_USER }}/software1-wiki
+          cd /home/${{ secrets.EC2_USER }}/software1-wiki
+        }
+        
+        # Stop and remove existing container if it exists
+        if [ "$(docker ps -aq -f name=${{ env.CONTAINER_NAME }})" ]; then
+          echo "Stopping existing container..."
+          docker stop ${{ env.CONTAINER_NAME }} || true
+          docker rm ${{ env.CONTAINER_NAME }} || true
+        fi
+        
+        # Remove existing image if it exists
+        if [ "$(docker images -q ${{ env.DOCKER_IMAGE }})" ]; then
+          echo "Removing existing image..."
+          docker rmi ${{ env.DOCKER_IMAGE }} || true
+        fi
+        
+        echo "✅ Cleanup completed"
+        EOF
+        
+        # Copy deployment script to EC2
+        scp deploy_remote.sh ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }}:/home/${{ secrets.EC2_USER }}/
+        
+        # Make script executable and run it
+        ssh ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} "chmod +x /home/${{ secrets.EC2_USER }}/deploy_remote.sh && /home/${{ secrets.EC2_USER }}/deploy_remote.sh"
 
-    - name: Deploy Amazon ECS task definition
-      uses: aws-actions/amazon-ecs-deploy-task-definition@v1
-      with:
-        task-definition: ${{ steps.task-def.outputs.task-definition }}
-        service: ${{ env.ECS_SERVICE }}
-        cluster: ${{ env.ECS_CLUSTER }}
-        wait-for-service-stability: true
+    - name: Copy application files to EC2
+      run: |
+        # Copy all application files to EC2
+        rsync -avz --delete \
+          --exclude='.git' \
+          --exclude='.github' \
+          --exclude='node_modules' \
+          --exclude='*.log' \
+          ./ ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }}:/home/${{ secrets.EC2_USER }}/software1-wiki/
+
+    - name: Build and start application on EC2
+      run: |
+        ssh ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} << 'EOF'
+        cd /home/${{ secrets.EC2_USER }}/software1-wiki
+        
+        echo "🔨 Building Docker image..."
+        docker build -t ${{ env.DOCKER_IMAGE }} .
+        
+        echo "🚀 Starting application container..."
+        docker run -d \
+          --name ${{ env.CONTAINER_NAME }} \
+          --restart unless-stopped \
+          -p 80:80 \
+          ${{ env.DOCKER_IMAGE }}
+        
+        echo "⏳ Waiting for application to start..."
+        sleep 10
+        
+        echo "🔍 Checking application health..."
+        if curl -f http://localhost/ > /dev/null 2>&1; then
+          echo "✅ Application is healthy and responding"
+        else
+          echo "⚠️  Health check failed, but container is running"
+        fi
+        
+        echo "📊 Container status:"
+        docker ps -f name=${{ env.CONTAINER_NAME }}
+        
+        echo "🎉 Deployment completed successfully!"
+        echo "🌐 Application is available at: http://${{ secrets.EC2_HOST }}"
+        EOF
+
+    - name: Verify deployment
+      run: |
+        echo "🔍 Verifying deployment..."
+        sleep 5
+        if curl -f http://${{ secrets.EC2_HOST }}/ > /dev/null 2>&1; then
+          echo "✅ Deployment verification successful!"
+          echo "🌐 Your application is live at: http://${{ secrets.EC2_HOST }}"
+        else
+          echo "❌ Deployment verification failed"
+          exit 1
+        fi
