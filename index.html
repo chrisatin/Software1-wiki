@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wiki de Ingeniería de Software I</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar -->
+        <nav class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <h2><i class="fas fa-book"></i> Wiki Software I</h2>
+                <button class="sidebar-toggle" id="sidebarToggle">
+                    <i class="fas fa-bars"></i>
+                </button>
+            </div>
+            <div class="sidebar-content">
+                <div class="nav-section">
+                    <h3>Menú Principal</h3>
+                    <ul>
+                        <li><a href="#home" class="nav-link active" data-page="home">
+                            <i class="fas fa-home"></i> Página de Inicio
+                        </a></li>
+                        <li><a href="#ciclo-vida" class="nav-link" data-page="ciclo-vida">
+                            <i class="fas fa-sync-alt"></i> Ciclo de Vida del Software
+                        </a></li>
+                    </ul>
+                </div>
+                
+                <div class="nav-section">
+                    <h3>Modelos de Desarrollo</h3>
+                    <ul>
+                        <li><a href="#cascada" class="nav-link" data-page="cascada">
+                            <i class="fas fa-stream"></i> Modelo en Cascada
+                        </a></li>
+                        <li><a href="#prototipos" class="nav-link" data-page="prototipos">
+                            <i class="fas fa-cube"></i> Modelo de Prototipos
+                        </a></li>
+                        <li><a href="#rad" class="nav-link" data-page="rad">
+                            <i class="fas fa-rocket"></i> Modelo RAD
+                        </a></li>
+                        <li><a href="#evolutivo" class="nav-link" data-page="evolutivo">
+                            <i class="fas fa-seedling"></i> Modelo Evolutivo
+                        </a></li>
+                        <li><a href="#espiral" class="nav-link" data-page="espiral">
+                            <i class="fas fa-spinner"></i> Modelo en Espiral
+                        </a></li>
+                        <li><a href="#v-model" class="nav-link" data-page="v-model">
+                            <i class="fas fa-check-double"></i> Modelo en V
+                        </a></li>
+                    </ul>
+                </div>
+                
+                <div class="nav-section">
+                    <h3>Información</h3>
+                    <ul>
+                        <li><a href="#docente" class="nav-link" data-page="docente">
+                            <i class="fas fa-user-tie"></i> Info del Docente
+                        </a></li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="content-header">
+                <button class="mobile-menu-toggle" id="mobileMenuToggle">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <div class="breadcrumb" id="breadcrumb">
+                    <span class="breadcrumb-item active">Inicio</span>
+                </div>
+            </header>
+
+            <div class="content-body" id="contentBody">
+                <!-- Home Page -->
+                <div class="page active" id="home">
+                    <div class="page-header">
+                        <h1><i class="fas fa-graduation-cap"></i> Wiki de Ingeniería de Software I</h1>
+                        <p class="page-subtitle">Fundamentos, modelos y procesos del desarrollo de software</p>
+                    </div>
+
+                    <div class="welcome-section">
+                        <div class="welcome-card">
+                            <h2>Propósito de la Asignatura</h2>
+                            <p>El objetivo de este curso es:</p>
+                            <ul class="objective-list">
+                                <li><i class="fas fa-check-circle"></i> Fomentar el significado de la ingeniería en el proceso de desarrollo de software</li>
+                                <li><i class="fas fa-check-circle"></i> Aplicar procesos industriales utilizando las mejores prácticas de producción internacional</li>
+                                <li><i class="fas fa-check-circle"></i> Seleccionar, con justificación, el modelo de ciclo de vida apropiado para el diseño, desarrollo y mantenimiento de productos de software</li>
+                                <li><i class="fas fa-check-circle"></i> Conceptuar, entender y aplicar métodos de análisis y especificación de requisitos en un sistema de software pequeño</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="content-sections">
+                        <div class="section-card">
+                            <div class="section-header">
+                                <h3><i class="fas fa-sync-alt"></i> 1. Ciclo de Vida del Software</h3>
+                            </div>
+                            <div class="section-content">
+                                <p>Modelos de ciclo de vida del proceso software y el software como producto y sus métricas.</p>
+                                <a href="#ciclo-vida" class="btn btn-primary" data-page="ciclo-vida">Explorar</a>
+                            </div>
+                        </div>
+
+                        <div class="section-card">
+                            <div class="section-header">
+                                <h3><i class="fas fa-list-check"></i> 2. Requisitos</h3>
+                            </div>
+                            <div class="section-content">
+                                <p>Elicitación y especificación de requisitos, técnicas de análisis y prototipado.</p>
+                            </div>
+                        </div>
+
+                        <div class="section-card">
+                            <div class="section-header">
+                                <h3><i class="fas fa-sitemap"></i> 3. Arquitectura de Software</h3>
+                            </div>
+                            <div class="section-content">
+                                <p>Fundamentos, tipos y patrones de diseño, diseño UML (Casos de Uso, Análisis, Diseño, Despliegue).</p>
+                            </div>
+                        </div>
+
+                        <div class="section-card">
+                            <div class="section-header">
+                                <h3><i class="fas fa-cogs"></i> 4. Diseño Detallado</h3>
+                            </div>
+                            <div class="section-content">
+                                <p>Modelos de implementación y pruebas, selección de herramientas y métricas.</p>
+                            </div>
+                        </div>
+
+                        <div class="section-card">
+                            <div class="section-header">
+                                <h3><i class="fas fa-bug"></i> 5. Pruebas</h3>
+                            </div>
+                            <div class="section-content">
+                                <p>Planificación y principios, técnicas de caja negra y caja blanca, inspecciones y revisiones.</p>
+                            </div>
+                        </div>
+
+                        <div class="section-card">
+                            <div class="section-header">
+                                <h3><i class="fas fa-tools"></i> 6. Operación y Mantenimiento</h3>
+                            </div>
+                            <div class="section-content">
+                                <p>Procesos, reingeniería y reutilización.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="instructor-info">
+                        <div class="instructor-card">
+                            <h3><i class="fas fa-user-tie"></i> Profesor</h3>
+                            <p><strong>Jeison Mauricio Delgado González</strong></p>
+                            <a href="https://www.linkedin.com/in/jeisonmauriciod/" target="_blank" class="btn btn-outline">
+                                <i class="fab fa-linkedin"></i> LinkedIn
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Other pages will be dynamically loaded here -->
+            </div>
+        </main>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
