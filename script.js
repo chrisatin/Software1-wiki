@@ -13,6 +13,21 @@ class WikiApp {
         this.setupEventListeners();
         this.loadPageContent();
         this.setupMobileMenu();
+        this.setupScrollToTop();
+    }
+
+    setupScrollToTop() {
+        const scrollBtn = document.getElementById('scrollToTopBtn');
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 200) {
+                scrollBtn.style.display = 'flex';
+            } else {
+                scrollBtn.style.display = 'none';
+            }
+        });
+        scrollBtn.addEventListener('click', () => {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
     }
 
     setupEventListeners() {
@@ -39,11 +54,21 @@ class WikiApp {
             }
         });
 
-        // Sidebar toggle
+
+        // Sidebar toggle (dentro del sidebar)
         const sidebarToggle = document.getElementById('sidebarToggle');
         if (sidebarToggle) {
             sidebarToggle.addEventListener('click', () => {
                 this.toggleSidebar();
+                this.updateSidebarOpenToggle();
+            });
+        }
+
+        // Sidebar open toggle (header, solo escritorio)
+        const sidebarOpenToggle = document.getElementById('sidebarOpenToggle');
+        if (sidebarOpenToggle) {
+            sidebarOpenToggle.addEventListener('click', () => {
+                this.openSidebarDesktop();
             });
         }
 
@@ -90,9 +115,11 @@ class WikiApp {
         if (window.innerWidth <= 768) {
             sidebar.classList.add('collapsed');
             mainContent.classList.add('sidebar-collapsed');
+            this.updateSidebarOpenToggle();
         } else {
             sidebar.classList.remove('collapsed', 'open');
             mainContent.classList.remove('sidebar-collapsed');
+            this.updateSidebarOpenToggle();
         }
     }
 
@@ -105,7 +132,30 @@ class WikiApp {
         } else {
             sidebar.classList.toggle('collapsed');
             mainContent.classList.toggle('sidebar-collapsed');
+            this.updateSidebarOpenToggle();
         }
+    }
+
+    // Mostrar/ocultar el botón de abrir sidebar en el header (escritorio)
+    updateSidebarOpenToggle() {
+        const sidebar = document.getElementById('sidebar');
+        const mainContent = document.querySelector('.main-content');
+        const sidebarOpenToggle = document.getElementById('sidebarOpenToggle');
+        if (!sidebarOpenToggle) return;
+        if (window.innerWidth > 768 && sidebar.classList.contains('collapsed')) {
+            sidebarOpenToggle.style.display = 'inline-block';
+        } else {
+            sidebarOpenToggle.style.display = 'none';
+        }
+    }
+
+    // Abrir el sidebar en escritorio desde el header
+    openSidebarDesktop() {
+        const sidebar = document.getElementById('sidebar');
+        const mainContent = document.querySelector('.main-content');
+        sidebar.classList.remove('collapsed');
+        mainContent.classList.remove('sidebar-collapsed');
+        this.updateSidebarOpenToggle();
     }
 
     toggleMobileMenu() {
