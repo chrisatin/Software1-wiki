@@ -13,22 +13,26 @@ class WikiApp {
     }
 
     setupEventListeners() {
-        // Navigation links
+        // Navigation links (sidebar)
         document.querySelectorAll('.nav-link').forEach(link => {
             link.addEventListener('click', (e) => {
                 e.preventDefault();
                 const page = e.currentTarget.getAttribute('data-page');
-                this.navigateToPage(page);
+                if (page) {
+                    this.navigateToPage(page);
+                }
             });
         });
 
         // Botones tipo "Explorar" y "back-button" en el contenido dinámico
         document.getElementById('contentBody').addEventListener('click', (e) => {
-            const target = e.target.closest('[data-page]');
+            const target = e.target.closest('a[data-page]');
             if (target) {
                 e.preventDefault();
                 const page = target.getAttribute('data-page');
-                this.navigateToPage(page);
+                if (page) {
+                    this.navigateToPage(page);
+                }
             }
         });
 
