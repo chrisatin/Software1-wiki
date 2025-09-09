@@ -22,6 +22,16 @@ class WikiApp {
             });
         });
 
+        // Botones tipo "Explorar" y "back-button" en el contenido dinámico
+        document.getElementById('contentBody').addEventListener('click', (e) => {
+            const target = e.target.closest('[data-page]');
+            if (target) {
+                e.preventDefault();
+                const page = target.getAttribute('data-page');
+                this.navigateToPage(page);
+            }
+        });
+
         // Sidebar toggle
         const sidebarToggle = document.getElementById('sidebarToggle');
         if (sidebarToggle) {
@@ -620,7 +630,9 @@ class WikiApp {
     }
 
     getHomeContent() {
-        return document.getElementById('home').outerHTML;
+    // Asegura que el contenido de inicio se muestre correctamente
+    const home = document.getElementById('home');
+    return home ? home.innerHTML : '';
     }
 
     loadPageContent() {
@@ -737,16 +749,5 @@ class WikiApp {
 
 // Initialize the application when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
-    new WikiApp();
-});
-
-// Add click handlers for dynamically generated content
-document.addEventListener('click', (e) => {
-    if (e.target.matches('[data-page]')) {
-        e.preventDefault();
-        const page = e.target.getAttribute('data-page');
-        if (window.wikiApp) {
-            window.wikiApp.navigateToPage(page);
-        }
-    }
+    window.wikiApp = new WikiApp();
 });
