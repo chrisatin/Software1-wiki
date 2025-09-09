@@ -395,6 +395,19 @@ body {
 
 /* Instructor Info */
 .instructor-info {
+/* Botón LinkedIn destacado en instructor-card */
+.instructor-card a.btn.btn-outline {
+    background: #0A66C2;
+    color: #fff;
+    border: none;
+    font-weight: 600;
+    box-shadow: 0 2px 8px rgba(10,102,194,0.15);
+    transition: background 0.2s, box-shadow 0.2s;
+}
+.instructor-card a.btn.btn-outline:hover {
+    background: #004182;
+    box-shadow: 0 4px 16px rgba(10,102,194,0.25);
+}
     margin-top: 3rem;
 }
 
