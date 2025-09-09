@@ -3,6 +3,9 @@ class WikiApp {
     constructor() {
         this.currentPage = 'home';
         this.pages = {};
+        // Guardar el contenido inicial de la página de inicio
+        const homeDiv = document.getElementById('home');
+        this.homeContent = homeDiv ? homeDiv.innerHTML : '';
         this.init();
     }
 
@@ -634,9 +637,8 @@ class WikiApp {
     }
 
     getHomeContent() {
-    // Asegura que el contenido de inicio se muestre correctamente
-    const home = document.getElementById('home');
-    return home ? home.innerHTML : '';
+        // Devuelve el contenido guardado de la página de inicio
+        return this.homeContent;
     }
 
     loadPageContent() {
